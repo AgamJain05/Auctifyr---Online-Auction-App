@@ -1,6 +1,6 @@
-import { serial} from "drizzle-orm/pg-core";
+import { relations } from 'drizzle-orm'; 
 import {
-  boolean,
+  serial,
   timestamp,
   pgTable,
   text,
@@ -10,30 +10,29 @@ import {
 import postgres from "postgres"
 import { drizzle } from "drizzle-orm/postgres-js"
 import type { AdapterAccountType } from "next-auth/adapters"
- 
 const connectionString = "postgres://postgres:postgres@localhost:5432/drizzle"
 const pool = postgres(connectionString, { max: 1 })
  
 export const db = drizzle(pool)
  
-export const users = pgTable("user", {
+export const users = pgTable("aa_user", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   name: text("name"),
-  email: text("email").unique(),
+  email: text("email").notNull(),
   emailVerified: timestamp("emailVerified", { mode: "date" }),
   image: text("image"),
 })
  
 export const accounts = pgTable(
-  "AA_account",
+  "aa_account",
   {
     userId: text("userId")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     type: text("type").$type<AdapterAccountType>().notNull(),
-    provider: text("provider").notNull(),
+    provider: text("provider").notNull(), // Added provider column
     providerAccountId: text("providerAccountId").notNull(),
     refresh_token: text("refresh_token"),
     access_token: text("access_token"),
@@ -50,7 +49,7 @@ export const accounts = pgTable(
   })
 )
  
-export const sessions = pgTable("AA_session", {
+export const sessions = pgTable("aa_session", {
   sessionToken: text("sessionToken").primaryKey(),
   userId: text("userId")
     .notNull()
@@ -59,39 +58,39 @@ export const sessions = pgTable("AA_session", {
 })
  
 export const verificationTokens = pgTable(
-  "verificationToken",
+  "aa_verificationToken",
   {
     identifier: text("identifier").notNull(),
     token: text("token").notNull(),
     expires: timestamp("expires", { mode: "date" }).notNull(),
   },
-  (verificationToken) => ({
+  (vt) => ({
     compositePk: primaryKey({
-      columns: [verificationToken.identifier, verificationToken.token],
+      columns: [vt.identifier, vt.token],
     }),
   })
 )
  
-export const authenticators = pgTable(
-  "authenticator",
-  {
-    credentialID: text("credentialID").notNull().unique(),
-    userId: text("userId")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    providerAccountId: text("providerAccountId").notNull(),
-    credentialPublicKey: text("credentialPublicKey").notNull(),
-    counter: integer("counter").notNull(),
-    credentialDeviceType: text("credentialDeviceType").notNull(),
-    credentialBackedUp: boolean("credentialBackedUp").notNull(),
-    transports: text("transports"),
-  },
-  (authenticator) => ({
-    compositePK: primaryKey({
-      columns: [authenticator.userId, authenticator.credentialID],
-    }),
-  })
-)
+// export const authenticators = pgTable(
+//   "authenticator",
+//   {
+//     credentialID: text("credentialID").notNull().unique(),
+//     userId: text("userId")
+//       .notNull()
+//       .references(() => users.id, { onDelete: "cascade" }),
+//     providerAccountId: text("providerAccountId").notNull(),
+//     credentialPublicKey: text("credentialPublicKey").notNull(),
+//     counter: integer("counter").notNull(),
+//     credentialDeviceType: text("credentialDeviceType").notNull(),
+//     credentialBackedUp: boolean("credentialBackedUp").notNull(),
+//     transports: text("transports"),
+//   },
+//   (authenticator) => ({
+//     compositePK: primaryKey({
+//       columns: [authenticator.userId, authenticator.credentialID],
+//     }),
+//   })
+// )
 export const items = pgTable("aa_item", {
   id: serial("id").primaryKey(),
   userId: text("userId")
@@ -105,7 +104,7 @@ export const items = pgTable("aa_item", {
   endDate: timestamp("endDate", { mode: "date" }).notNull(),
 });
 
-export const bids = pgTable("aa- bids", {
+export const bids = pgTable("aa_bids", {
   id: serial("id").primaryKey(),
   amount: integer("amount").notNull(),
   itemId: serial("itemId")
@@ -124,4 +123,4 @@ export const usersRelations = relations(bids, ({ one }) => ({
   }),
 }));
 
-
+export type Item = typeof items.$inferSelect;

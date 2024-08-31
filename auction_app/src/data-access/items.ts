@@ -1,5 +1,5 @@
 import { database } from "@/db/database";
-import { items } from "@/db/schema";
+import { items } from "@/db/Schema";
 import { eq } from "drizzle-orm";
 
 export async function getItem(itemId: number) {

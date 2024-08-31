@@ -1,5 +1,5 @@
 import { database } from "@/db/database";
-import { bids } from "@/db/schema";
+import { bids } from "@/db/Schema";
 import { desc, eq } from "drizzle-orm";
 
 export async function getBidsForItem(itemId: number) {
