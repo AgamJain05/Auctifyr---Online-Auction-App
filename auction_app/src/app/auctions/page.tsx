@@ -2,7 +2,7 @@ import { EmptyState } from "@/app/auctions/empty-state";
 import { ItemCard } from "@/app/item-card";
 import { auth } from "@/auth";
 import { database } from "@/db/database";
-import { items } from "@/db/schema";
+import { items } from "@/db/Schema";
 import { pageTitleStyles } from "@/styles";
 import { eq } from "drizzle-orm";
 
